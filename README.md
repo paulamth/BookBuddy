@@ -2,14 +2,7 @@
 
 Ein REST-Backend zum Tauschen von Büchern. Registrierte Nutzer:innen legen Bücher in ihrer eigenen Bibliothek ab, suchen über die Google Books API nach Titeln und schlagen einander Tausche vor. Dazu gibt es eine einfache Weboberfläche mit Qute-Templates.
 
-Entstanden als **Teamprojekt zu zweit** im Wintersemester 2024/25 an der Hochschule Osnabrück.
-
-## Wer was gemacht hat
-
-| | |
-|---|---|
-| **Paula Matthies** | Anmeldung mit JWT (Token-Erzeugung, Cookie, eigener Authentifizierungs-Filter), Passwörter mit BCrypt, Gastzugang, Zugriffsschutz der Endpunkte, Lösch-Endpunkte, Fehlertoleranz mit Retry, Timeout und Circuit Breaker |
-| **Rieke Lübbe** | Datenmodell, Buchsuche über die Google Books API, Tauschlogik, Tests |
+Entstanden als **Teamprojekt zu zweit** (Paula Matthies und Rieke Lübbe) im Wintersemester 2024/25 an der Hochschule Osnabrück.
 
 ## Funktionen
 
