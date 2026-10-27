@@ -47,7 +47,7 @@ Java 21 · Quarkus 3 · JAX-RS (Quarkus REST) · Hibernate ORM (JPA) · PostgreS
 
 ### Voraussetzungen
 
-- Java 21
+- Java 21 (neuere Versionen wie Java 25 werden von der verwendeten Quarkus-Version noch nicht unterstützt)
 - Docker (Quarkus startet im Entwicklungsmodus automatisch eine PostgreSQL-Datenbank in einem Container)
 - OpenSSL zum Erzeugen der Schlüssel
 
