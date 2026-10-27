@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Bibliothek</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card p-4" style="width: 100%; max-width: 1200px;">
+        <h2 class="text-center mb-4">{user.name}'s Bibliothek</h2>
+
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th>Cover</th>
+                <th>Buchtitel</th>
+                <th>Autor</th>
+                <th>Veröffentlicht</th>
+                <th>Aktion</th>
+            </tr>
+            </thead>
+            <tbody>
+            {#for book in books}
+            <tr>
+                <td><img src={book.imageLink}></td>
+                <td>{book.title}</td>
+                <td>{book.authors}</td>
+                <td>{book.publishedDate}</td>
+                <td>
+                <form action="/books/deleteFromLibrary" method="post">
+                    <input type="hidden" name="bookId" value="{book.idInExternApi}">
+                    <button type="submit" class="btn btn-danger"
+                    {#if trades}
+                        {#for trade in trades}
+                            {#if trade.status != 'COMPLETED'}
+                                {#if trade.initiatorUserId == user.id && trade.databaseBookIdFirstBook == book.databaseId}
+                                    disabled
+                                {/if}
+                                {#if trade.acceptorUserId == user.id && trade.databaseBookIdSecondBook == book.databaseId}
+                                    disabled
+                                {/if}
+                            {/if}
+                        {/for}
+                            {/if}>
+                        löschen
+                    </button>
+                </form> <br>
+                <form action="/books/initTrade" method="post">
+                <input type="hidden" name="bookId" value="{book.idInExternApi}">
+                <button type="submit" class="btn btn-primary"
+                {#if trades}
+                    {#for trade in trades}
+                        {#if trade.status != 'COMPLETED'}
+                            {#if trade.initiatorUserId == user.id && trade.databaseBookIdFirstBook == book.databaseId}
+                                disabled
+                            {/if}
+                            {#if trade.acceptorUserId == user.id && trade.databaseBookIdSecondBook == book.databaseId}
+                                disabled
+                            {/if}
+                        {/if}
+                    {/for}
+                {/if}>
+                     Tausch anbieten
+                </button>
+                </form>
+                </td>
+                </tr>
+            {/for}
+
+            </tbody>
+        </table>
+        <br><br>
+
+        <h4 class="text-center mb-4">Von mir gestartete Tauschanfragen</h4>
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th>Mein Buch</th>
+                <th>Angebot des anderen Nutzers</th>
+                <th>Aktion</th>
+            </tr>
+            </thead>
+            <tbody>
+            {#for trade in trades}
+                {#if trade.status != 'COMPLETED'}
+                    {#if trade.initiatorUserId == user.id}  <!-- nur Tausche, bei denen der Benutzer Initiator ist -->
+                        <tr>
+                        <td>{trade.bookTitleFirstBook}</td>
+                        <td>{trade.bookTitleSecondBook}</td>
+                        <td>
+                        <form action="/trades/acceptOrReject" method="post">
+                        <input type="hidden" name="tradeId" value="{trade.id}">
+                        {#if trade.status == 'OTHER_USER_OFFERED'}
+                            <button type="submit" class="btn btn-success" name="action" value="accept" style="margin-bottom:10px;">annehmen</button><br>
+                            <button type="submit" class="btn btn-warning" name="action" value="reject">ablehnen</button>
+                        {#else}
+                            <p>Noch kein Gegenangebot</p>
+                        {/if}
+                        </form>
+                        </td>
+                        </tr>
+                    {/if}
+                {/if}
+            {/for}
+            </tbody>
+        </table>
+        <br><br>
+        <h4 class="text-center mb-4">Tauschangebote, bei denen ich ein Buch anbiete</h4>
+        <p>Die Person, der ich mein Buch im Gegentausch angeboten habe, muss das Angebot annehmen. Dann erscheint es bei den Abgeschlossenen und kann bewertet werden.</p>
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th>Angebotenes Buch</th>
+                <th>Mein Gegentausch</th>
+            </tr>
+            </thead>
+            <tbody>
+            {#for trade in trades}
+                {#if trade.acceptorUserId == user.id}  <!-- nur Tausche anzeigen, bei denen Benutzer der Acceptor -->
+                    {#if trade.status != 'COMPLETED'}  <!-- Nur abgeschlossene Tausche anzeigen -->
+                        <tr>
+                            <td>{trade.bookTitleFirstBook}</td>
+                            <td>{trade.bookTitleSecondBook}</td>
+                        </tr>
+                    {/if}
+                {/if}
+            {/for}
+            </tbody>
+        </table>
+        <br><br>
+        <h4 class="text-center mb-4">Abgeschlossene Tausche</h4>
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th>Mein Buch</th>
+                <th>Getauschtes Buch</th>
+                <th>Bewertung</th>
+            </tr>
+            </thead>
+            <tbody>
+            {#for trade in trades}
+                {#if trade.status == 'COMPLETED'}
+                    {#if trade.initiatorUserId == user.id}  <!-- wenn Benutzer Initiator, dann bookTitleFirstBook in erste Spalte -->
+                        <tr>
+                        <td>{trade.bookTitleFirstBook}</td>
+                        <td>{trade.bookTitleSecondBook}</td>
+                        <td>
+                        {#if trade.bewertung == '' || trade.bewertung == null}
+                            <form action="/trades/rate" method="post" class="text-center mt-4">
+                                <input type="hidden" name="tradeId" value="{trade.id}">
+                                <input type="text" id="bewertung" name="bewertung" class="form-control mb-2" placeholder="Geben Sie eine Bewertung ab" required>
+                                <button type="submit" class="btn btn-success">Bewerten</button>
+                            </form>
+                        {#else}
+                            <span>{trade.bewertung}</span>
+                        {/if}
+                        </td>
+                        </tr>
+                    {#else}  <!-- wenn Benutzer Acceptor ist, dann bookTitleSecondBook in erste Spalte -->
+                        <tr>
+                        <td>{trade.bookTitleSecondBook}</td>
+                        <td>{trade.bookTitleFirstBook}</td>
+                        <td>
+                        {#if trade.bewertung == '' || trade.bewertung == null}
+                            <form action="/trades/rate" method="post" class="text-center mt-4">
+                                <input type="hidden" name="tradeId" value="{trade.id}">
+                                <input type="text" id="bewertung" name="bewertung" class="form-control mb-2" placeholder="Geben Sie eine Bewertung ab" required>
+                                <button type="submit" class="btn btn-success">Bewerten</button>
+                            </form>
+                        {#else}
+                            <span>{trade.bewertung}</span>
+                        {/if}
+                        </td>
+                        </tr>
+                    {/if}
+                {/if}
+            {/for}
+            </tbody>
+        </table>
+
+        <form action="/books/search" method="get" class="text-center mt-4">
+            <button type="submit" class="btn btn-success">Zur Suche</button>
+        </form>
+
+        <form action="/trades" method="get" class="text-center mt-4">
+            <button type="submit" class="btn btn-success">Zur Übersicht aller offenen Tausche</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="/users/login" class="btn btn-danger ">Ausloggen</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

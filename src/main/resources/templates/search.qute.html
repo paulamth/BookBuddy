@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buchsuche</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card p-4" style="width: 100%; max-width: 1200px;">
+        <h1 class="text-center mb-4">Buchsuche</h1>
+
+        <form method="get" action="/books/search/filter">
+            <div class="form-group">
+                <label for="title">Titel:</label>
+                <input type="text" id="title" name="title" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="author">Autor:</label>
+                <input type="text" id="author" name="author" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="publishedDate">Veröffentlichungsdatum:</label>
+                <input type="text" id="publishedDate" name="publishedDate" class="form-control">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Suchen</button>
+        </form>
+        {#if error}
+        <div class="alert alert-danger mt-3 text-center">{error}</div>
+        {/if}
+        {#if books != null}
+        {#if books.size() > 0}
+        <h2 class="mt-5">Suchergebnisse</h2>
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th>Cover</th>
+                <th>Buchtitel</th>
+                <th>Autor</th>
+                <th>Veröffentlichungsdatum</th>
+                {#if user != null}
+                <th>Aktion</th>
+                {/if}
+            </tr>
+            </thead>
+            <tbody>
+            {#for book in books}
+            <tr>
+                <td><img src={book.imageLink}></td>
+                <td>{book.title}</td>
+                <td>{book.authors}</td>
+                <td>{book.publishedDate}</td>
+                {#if user != null}
+                    <td>
+                        <form action="/books/addToUserLibrary" method="post">
+                            <input type="hidden" name="bookId" value="{book.idInExternApi}">
+                            <button type="submit" class="btn btn-success">Zur meiner Bibliothek hinzufügen</button>
+                        </form>
+                    </td>
+                {/if}
+            </tr>
+            {/for}
+            </tbody>
+        </table>
+        {#else}
+        {/if}
+        {/if}
+
+        <div class="text-center mt-3">
+            <a href="/books/list" class="btn btn-primary btn-block">Meine Bibliothek</a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

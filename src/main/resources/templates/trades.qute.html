@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aktuell zum Tausch angebotene Bücher aller User</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card p-4" style="width: 100%; max-width: 1200px;">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th>Buchtitel</th>
+                <th>Aktion</th>
+            </tr>
+            </thead>
+            <tbody>
+            {#if trades != null && trades.size() > 0}
+                {#for trade in trades}
+                    {#if trade.initiatorUserId != user.id && trade.status != 'COMPLETED' && trade.status != 'OTHER_USER_OFFERED'}
+                        <tr>
+                        <td>{trade.bookTitleFirstBook}</td>
+                        <td>
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#tradeModal{trade.id}">
+                            Diesen Tausch anfragen
+                        </button>
+
+                        <div class="modal fade" id="tradeModal{trade.id}" tabindex="-1" role="dialog" aria-labelledby="tradeModalLabel{trade.id}" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="tradeModalLabel{trade.id}">Buch zum Tausch auswählen</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Schließen">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                        <form action="/trades/offerBookToTrade" method="post">
+                        <input type="hidden" name="tradeId" value="{trade.id}">
+                        <label for="selectedBook">Wählen Sie Ihr Buch aus, das Sie im Tausch anbieten möchten:</label>
+                        <select class="form-control" id="selectedBook" name="bookDBId">
+                        {#for book in availableBooksOfUser}
+                            <option value="{book.databaseId}">{book.title}</option>
+                        {/for}
+                        </select>
+                        <button type="submit" class="btn btn-success mt-3">Tausch anfragen</button>
+                        </form>
+                        </div>
+                        </div>
+                        </div>
+                        </div>
+                        </td>
+                        </tr>
+                    {/if}
+                {/for}
+            {#else}
+                <tr>
+                    <td colspan="4" class="text-center">Keine Bücher gefunden.</td>
+                </tr>
+            {/if}
+            </tbody>
+        </table>
+
+        <form action="/books/search" method="get" class="text-center mt-4">
+            <button type="submit" class="btn btn-success">Zur Buch-Suche</button>
+        </form>
+
+        <form action="/books/list" method="get" class="text-center mt-4">
+            <button type="submit" class="btn btn-success">Zum Benutzer-Dashboard</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
